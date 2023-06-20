@@ -1,0 +1,299 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model TypeItem {
+  code        String       @unique
+  name        String    
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  typeItems   Item[] 
+}
+
+model CostCenter {
+  code        String       @unique @db.VarChar(4)
+  name        String   
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt  
+  typeItems   Item[] 
+}
+
+model KeyCountry {
+  code        String        @unique @db.VarChar(3)
+  name        String   
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  typeItems   Item[] 
+}
+
+model Item {
+  id          Int             @id @default(autoincrement())
+  type        TypeItem        @relation(fields: [typeId], references: [code])
+  typeId      String
+  cc          CostCenter      @relation(fields: [ccId], references: [code])
+  ccId        String
+  kc          KeyCountry      @relation(fields: [kcId], references: [code])
+  kcId        String
+  purchase    PurchaseRequest @relation(fields: [purchaseId], references: [id])
+  purchaseId  Int
+  description String          
+  quantity    Int
+  priceUnit   Int
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+}
+
+model User{
+  id          Int             @id @default(autoincrement())
+  name        String
+  email       String          @unique @db.VarChar(255)
+  password    String          @db.VarChar(255)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  purchaseRequests   PurchaseRequest[]
+}
+
+model Vendor{
+  id          Int             @id @default(autoincrement())
+  codeSap     String          @unique @db.VarChar(255)
+  name        String          @unique
+  fiscalTaxId String          @unique @db.VarChar(14)
+  email       String          @unique @db.VarChar(255)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  purchaseRequests    PurchaseRequest[]
+  bankAccounts        BankAccount[]
+  addresses           Address[]
+}
+
+model PurchaseRequest{
+  id            Int             @id @default(autoincrement())
+  requester     User            @relation(fields: [requesterId], references: [id])
+  requesterId   Int
+  type          RequestType
+  delivery      Condition
+  description   String
+  totalContract Int
+  startContract DateTime
+  endContract   DateTime
+  contract      String
+  vendor        Vendor          @relation(fields: [vendorId], references: [id])
+  vendorId      Int
+  observation   String
+  status        PurchaseStatus
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  typeItems     Item[]
+  approvals     Approval[]
+}
+
+enum RequestType {
+  New
+  Renewal
+  Adjustment
+  Termination
+}
+
+enum Condition {
+  Recurrent
+  Spot
+}
+
+enum PurchaseStatus {
+  Sent
+  Approved
+  Rejected
+  Reported
+}
+
+model Approval{
+  emailApprover String        
+  status        Boolean  
+  purchase      PurchaseRequest           @relation(fields: [purchaseId], references: [id])
+  purchaseId    Int
+  createdAt     DateTime                  @default(now())
+  updatedAt     DateTime                  @updatedAt
+  @@unique([emailApprover,purchaseId])
+}
+
+model BankAccount{
+  vendor        Vendor          @relation(fields: [vendorId], references: [id])
+  vendorId      Int             @unique
+  codeBank      String          @db.VarChar(3)
+  branch        String          @db.VarChar(4)
+  account       String
+  digit         String          @db.VarChar(1)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+}
+
+model City {
+  code        Int       @unique
+  name        String    
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  addresses   Address[]
+}
+
+model State {
+  code        String       @unique
+  name        String    
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  addresses   Address[]
+}
+
+model Country {
+  code        String       @unique
+  name        String    
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  addresses   Address[]
+}
+
+model Address{
+  vendor        Vendor          @relation(fields: [vendorId], references: [id])
+  vendorId      Int             @unique
+  addressType   String
+  street        String
+  streetNo      Int
+  complement    String 
+  zipCode       String          @db.VarChar(8)
+  block         String          
+  city          City            @relation(fields: [cityId], references: [code])
+  cityId        Int
+  state         State           @relation(fields: [stateId], references: [code])
+  stateId       String
+  country       Country         @relation(fields: [countryId], references: [code])
+  countryId     String
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+}
+
+
+
+// model Session {
+//   id        Int      @id @default(autoincrement())
+//   userId    Int
+//   User      User     @relation(fields: [userId], references: [id])
+//   token     String
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+// }
+
+// model Event {
+//   id                 Int      @id @default(autoincrement())
+//   title              String   @db.VarChar(255)
+//   backgroundImageUrl String   @db.VarChar(255)
+//   logoImageUrl       String   @db.VarChar(255)
+//   startsAt           DateTime
+//   endsAt             DateTime
+//   createdAt          DateTime @default(now())
+//   updatedAt          DateTime @updatedAt
+// }
+
+// model Enrollment {
+//   id        Int       @id @default(autoincrement())
+//   name      String    @db.VarChar(255)
+//   cpf       String    @db.VarChar(255)
+//   birthday  DateTime
+//   phone     String    @db.VarChar(255)
+//   userId    Int       @unique
+//   User      User      @relation(fields: [userId], references: [id])
+//   Address   Address[]
+//   createdAt DateTime  @default(now())
+//   updatedAt DateTime  @updatedAt
+//   Ticket    Ticket[]
+// }
+
+// model Address {
+//   id            Int        @id @default(autoincrement())
+//   cep           String     @db.VarChar(255)
+//   street        String     @db.VarChar(255)
+//   city          String     @db.VarChar(255)
+//   state         String     @db.VarChar(255)
+//   number        String     @db.VarChar(255)
+//   neighborhood  String     @db.VarChar(255)
+//   addressDetail String?    @db.VarChar(255)
+//   enrollmentId  Int        @unique
+//   Enrollment    Enrollment @relation(fields: [enrollmentId], references: [id])
+//   createdAt     DateTime   @default(now())
+//   updatedAt     DateTime   @updatedAt
+// }
+
+// model TicketType {
+//   id            Int      @id @default(autoincrement())
+//   name          String   @db.VarChar(255)
+//   price         Int
+//   isRemote      Boolean
+//   includesHotel Boolean
+//   createdAt     DateTime @default(now())
+//   updatedAt     DateTime @updatedAt
+//   Ticket        Ticket[]
+// }
+
+// model Ticket {
+//   id           Int          @id @default(autoincrement())
+//   ticketTypeId Int
+//   TicketType   TicketType   @relation(fields: [ticketTypeId], references: [id])
+//   enrollmentId Int
+//   Enrollment   Enrollment   @relation(fields: [enrollmentId], references: [id])
+//   status       TicketStatus
+//   createdAt    DateTime     @default(now())
+//   updatedAt    DateTime     @updatedAt
+//   Payment      Payment[]
+// }
+
+// enum TicketStatus {
+//   RESERVED
+//   PAID
+// }
+
+// model Payment {
+//   id             Int      @id @default(autoincrement())
+//   ticketId       Int
+//   Ticket         Ticket   @relation(fields: [ticketId], references: [id])
+//   value          Int
+//   cardIssuer     String
+//   cardLastDigits String
+//   createdAt      DateTime @default(now())
+//   updatedAt      DateTime @updatedAt
+// }
+
+// model Hotel {
+//   id        Int      @id @default(autoincrement())
+//   name      String
+//   image     String
+//   Rooms     Room[]
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+// }
+
+// model Room {
+//   id        Int       @id @default(autoincrement())
+//   name      String
+//   capacity  Int
+//   hotelId   Int
+//   Hotel     Hotel     @relation(fields: [hotelId], references: [id])
+//   Booking   Booking[]
+//   createdAt DateTime  @default(now())
+//   updatedAt DateTime  @updatedAt
+// }
+
+// model Booking {
+//   id        Int      @id @default(autoincrement())
+//   User      User     @relation(fields: [userId], references: [id])
+//   userId    Int
+//   Room      Room     @relation(fields: [roomId], references: [id])
+//   roomId    Int
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+// }
