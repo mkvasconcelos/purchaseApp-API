@@ -5,18 +5,8 @@ import { AuthenticatedRequest } from '@/middlewares';
 
 export async function createPurchase(req: AuthenticatedRequest, res: Response) {
   const { userId } = req;
-  const {
-    type,
-    delivery,
-    description,
-    startContract,
-    endContract,
-    contract,
-    vendorId,
-    observation,
-    status,
-    listItems,
-  } = req.body;
+  const { type, delivery, description, startContract, endContract, vendorId, observation, listItems, approverId } =
+    req.body;
   let parts = startContract.split('-');
   const newStartContract = new Date(parts[0], parts[1] - 1, parts[2]);
   parts = endContract.split('-');
@@ -31,23 +21,22 @@ export async function createPurchase(req: AuthenticatedRequest, res: Response) {
       userId,
       type,
       delivery,
-      description,
       totalContract,
       newStartContract,
       newEndContract,
-      contract,
       vendorId,
       observation,
-      status,
+      approverId,
+      description,
     );
     const purchaseId = result.id;
     for (let i = 0; i < listItems.length; i++) {
-      const { typeId, ccId, kcId, description, quantity, priceUnit } = listItems[i];
-      await purchaseService.createItem(typeId, ccId, kcId, purchaseId, description, quantity, priceUnit);
+      const { typeId, ccId, kcId, quantity, priceUnit } = listItems[i];
+      await purchaseService.createItem(typeId, ccId, kcId, purchaseId, quantity, priceUnit);
     }
     return res.sendStatus(httpStatus.CREATED);
   } catch (error) {
-    // return res.status(httpStatus.CONFLICT).send(error);
+    return res.sendStatus(httpStatus.BAD_REQUEST);
   }
 }
 
@@ -57,7 +46,7 @@ export async function readPurchase(req: AuthenticatedRequest, res: Response) {
     const result = await purchaseService.readPurchase(userId);
     return res.status(httpStatus.OK).send(result);
   } catch (error) {
-    // return res.status(httpStatus.CONFLICT).send(error);
+    return res.sendStatus(httpStatus.BAD_REQUEST);
   }
 }
 
@@ -69,6 +58,10 @@ export async function readPurchaseById(req: AuthenticatedRequest, res: Response)
     const result = await purchaseService.readPurchaseById(userId, newId);
     return res.status(httpStatus.OK).send(result);
   } catch (error) {
-    // return res.status(httpStatus.CONFLICT).send(error);
+    if (error.name === 'NotFoundError') {
+      return res.sendStatus(httpStatus.NOT_FOUND);
+    } else {
+      return res.sendStatus(httpStatus.BAD_REQUEST);
+    }
   }
 }

@@ -24,7 +24,13 @@ async function findById(id: number) {
 }
 
 async function readVendor() {
-  return prisma.vendor.findMany({});
+  return prisma.vendor.findMany({
+    select: {
+      fiscalTaxId: true,
+      name: true,
+      id: true,
+    },
+  });
 }
 
 const vendorRepository = {

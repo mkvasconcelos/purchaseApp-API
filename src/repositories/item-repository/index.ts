@@ -1,12 +1,11 @@
 import { prisma } from '@/config';
-import { Item } from '@prisma/client';
+import { Item, CostCenter, KeyCountry } from '@prisma/client';
 
 async function createItem(
   typeId: string,
   ccId: string,
   kcId: string,
   purchaseId: number,
-  description: string,
   quantity: number,
   priceUnit: number,
 ): Promise<Item> {
@@ -16,7 +15,6 @@ async function createItem(
       ccId,
       kcId,
       purchaseId,
-      description,
       quantity,
       priceUnit,
     },
@@ -40,10 +38,22 @@ async function readTypeItem() {
   });
 }
 
+async function findTypeItem(code: string) {
+  return prisma.typeItem.findFirst({
+    where: {
+      code,
+    },
+    select: {
+      name: true,
+    },
+  });
+}
+
 const itemRepository = {
   createItem,
   readItem,
   readTypeItem,
+  findTypeItem,
 };
 
 export default itemRepository;

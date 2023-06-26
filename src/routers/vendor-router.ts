@@ -1,8 +1,7 @@
 import { Router } from 'express';
-import { validateBody } from '@/middlewares';
-import { authenticateToken } from '@/middlewares/authentication-middleware';
-import { vendorSchema } from '@/schemas/vendor-schemas';
-import { createVendor } from '@/controllers/vendor-controller';
+import { vendorSchema } from '@/schemas';
+import { validateBody, authenticateToken } from '@/middlewares';
+import { createVendor } from '@/controllers';
 
 const vendorRouter = Router();
 

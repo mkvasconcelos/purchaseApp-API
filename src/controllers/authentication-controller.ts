@@ -5,7 +5,7 @@ import authenticationService from '@/services/authentication-service';
 export async function signUp(req: Request, res: Response) {
   const { name, email, password } = req.body;
   try {
-    const result = await authenticationService.signUp(name, email, password);
+    await authenticationService.signUp(name, email, password);
     return res.sendStatus(httpStatus.CREATED);
   } catch (error) {
     return res.status(httpStatus.CONFLICT).send(error);

@@ -1,8 +1,7 @@
 import { Router } from 'express';
-import { validateBody } from '@/middlewares';
 import { purchaseSchema } from '@/schemas';
-import { authenticateToken } from '@/middlewares/authentication-middleware';
-import { createPurchase, readPurchase, readPurchaseById } from '@/controllers/purchase-controller';
+import { validateBody, authenticateToken } from '@/middlewares';
+import { createPurchase, readPurchase, readPurchaseById } from '@/controllers';
 
 const purchaseRouter = Router();
 

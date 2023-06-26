@@ -9,6 +9,6 @@ export async function createVendor(req: AuthenticatedRequest, res: Response) {
     const result = await vendorService.createVendor(codeSap, name, fiscalTaxId, email);
     return res.sendStatus(httpStatus.CREATED);
   } catch (error) {
-    // return res.status(httpStatus.CONFLICT).send(error);
+    return res.sendStatus(httpStatus.BAD_REQUEST);
   }
 }

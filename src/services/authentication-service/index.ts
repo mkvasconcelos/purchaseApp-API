@@ -1,8 +1,7 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import userRepository from '@/repositories/user-repository';
-import { conflictError } from '@/errors';
-import { invalidCredentialsError } from './errors';
+import { conflictError, invalidCredentialsError } from '@/errors';
 
 async function signUp(name: string, email: string, password: string) {
   const user = await userRepository.findByEmail(email);
@@ -27,4 +26,3 @@ const authenticationService = {
 };
 
 export default authenticationService;
-export * from './errors';

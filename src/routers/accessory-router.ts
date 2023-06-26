@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { authenticateToken } from '@/middlewares/authentication-middleware';
-import { readAccessory } from '@/controllers/accessory-controller';
+import { authenticateToken } from '@/middlewares';
+import { readAccessory } from '@/controllers';
 
 const accessoryRouter = Router();
 
